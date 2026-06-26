@@ -1,0 +1,3 @@
+breezeai/          # generated ndjson output (not source)
+.breeze.json       # contains apiKey — never index
+*.html             # rendered spec artifacts
