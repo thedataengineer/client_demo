@@ -1,0 +1,190 @@
+{
+  "timestamp": "2026-06-26T14:00:58.235544+00:00",
+  "summary": {
+    "personas": 2,
+    "outcomes": 2,
+    "scenarios": 5,
+    "steps": 5,
+    "actions": 5
+  },
+  "checks": {
+    "empty_nodes": {
+      "severity": "P0",
+      "count": 0,
+      "items": []
+    },
+    "duplicate_scenarios": {
+      "severity": "P1",
+      "count": 0,
+      "items": []
+    },
+    "duplicate_outcomes": {
+      "count": 0,
+      "items": []
+    },
+    "citation_coverage": {
+      "severity": "P1",
+      "total_nodes": 7,
+      "cited": 7,
+      "percentage": 100.0,
+      "uncited_items": [],
+      "uncited_total": 0
+    },
+    "description_coverage": {
+      "severity": "P1",
+      "scenarios": {
+        "total": 5,
+        "with_description": 5,
+        "percentage": 100.0
+      },
+      "system_actions": {
+        "total": 3,
+        "with_description": 3,
+        "percentage": 100.0,
+        "missing_samples": []
+      },
+      "human_actions": {
+        "total": 2,
+        "with_description": 2,
+        "note": "Human actions don't require descriptions unless there's a constraint"
+      }
+    },
+    "platform_agnostic": {
+      "severity": "P1",
+      "total_human_actions": 2,
+      "violations": 0,
+      "compliance_percentage": 100.0,
+      "items": [],
+      "total_violations": 0
+    },
+    "persona_quality": {
+      "severity": "P1",
+      "personas": [
+        {
+          "persona": "System",
+          "outcomes": 1,
+          "scenarios": 3,
+          "steps": 3,
+          "actions": 3,
+          "scenario_share": 60.0,
+          "flags": [
+            "BLOATED: holds 60.0% of all scenarios"
+          ]
+        },
+        {
+          "persona": "Dashboard Viewer",
+          "outcomes": 1,
+          "scenarios": 2,
+          "steps": 2,
+          "actions": 2,
+          "scenario_share": 40.0,
+          "flags": []
+        }
+      ],
+      "flagged_count": 1
+    },
+    "cross_persona_overlap": {
+      "severity": "P2",
+      "count": 0,
+      "items": []
+    },
+    "source_coverage": {
+      "severity": "P0",
+      "total_stories": 9,
+      "full": 7,
+      "partial": 1,
+      "missing": 1,
+      "items": [
+        {
+          "story": "PRD-1 Real-time data visualization",
+          "status": "FULL",
+          "found": 4,
+          "total": 6,
+          "missing_keywords": [
+            "real-time",
+            "visualization"
+          ]
+        },
+        {
+          "story": "PRD-2 RESTful API integration",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "integration"
+          ]
+        },
+        {
+          "story": "PRD-3 Persistent storage PostgreSQL",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "storage"
+          ]
+        },
+        {
+          "story": "API-1 GET /api/items",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "fetch all items"
+          ]
+        },
+        {
+          "story": "API-2 POST /api/items",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "create item"
+          ]
+        },
+        {
+          "story": "API-3 GET / health",
+          "status": "FULL",
+          "found": 4,
+          "total": 4,
+          "missing_keywords": []
+        },
+        {
+          "story": "ARCH-1 React frontend",
+          "status": "MISSING",
+          "found": 0,
+          "total": 5,
+          "missing_keywords": [
+            "react",
+            "vite",
+            "frontend",
+            "ui",
+            "user interface"
+          ]
+        },
+        {
+          "story": "ARCH-2 FastAPI backend",
+          "status": "PARTIAL",
+          "found": 2,
+          "total": 4,
+          "missing_keywords": [
+            "fastapi",
+            "business logic"
+          ]
+        },
+        {
+          "story": "ARCH-3 PostgreSQL database",
+          "status": "FULL",
+          "found": 4,
+          "total": 4,
+          "missing_keywords": []
+        }
+      ]
+    }
+  },
+  "overall": {
+    "p0_issues": 0,
+    "p1_issues": 1,
+    "p2_issues": 0,
+    "health": "HEALTHY"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "executiveSummary": "KCE_Demo is a three-tier reference application: a React/Vite single-page dashboard, a FastAPI service, and a PostgreSQL database, wired together over a small REST surface. The dashboard reads backend health and the current item catalog on load; the service exposes three endpoints that report health and list or create catalog items backed by a single 'items' table. The functional graph captures two actors: the Dashboard Viewer who consumes the read-only dashboard, and the System that owns the API and persistence. Scope is deliberately narrow, this is a demo stack, not a production product.",
+  "keyBusinessObjectives": [
+    "Demonstrate an end-to-end React + FastAPI + PostgreSQL slice that runs fully offline via Docker Compose",
+    "Expose a minimal REST contract (health, list items, create item) that the frontend consumes directly",
+    "Persist catalog items durably in PostgreSQL through SQLAlchemy",
+    "Surface backend connectivity status to the user on dashboard load"
+  ],
+  "keyStakeholders": [
+    { "role": "Dashboard Viewer", "interest": "Wants to see at a glance whether the backend is reachable and what items currently exist, without any edit controls." },
+    { "role": "System", "interest": "Owns the REST contract and the items table; responsible for serving reads, accepting writes, and reporting health." }
+  ],
+  "keyCapabilities": [
+    "Backend health reporting via GET /",
+    "Paginated item listing via GET /api/items (skip/limit)",
+    "Item creation via POST /api/items (name, description)",
+    "Read-only dashboard rendering of status and item list with empty-state handling",
+    "PostgreSQL persistence of the items table through SQLAlchemy"
+  ],
+  "personaEnrichments": {
+    "System": { "description": "The FastAPI backend service. Exposes the REST contract, owns the SQLAlchemy-mapped 'items' table in PostgreSQL, and reports its own liveness." },
+    "Dashboard Viewer": { "description": "An end user of the React/Vite SPA. Opens the dashboard to view backend connectivity and the current catalog; the UI exposes no create or edit controls." }
+  },
+  "outcomeEnrichments": {
+    "8b00b96e-e912-470b-aa25-fd29b44228b3": {
+      "businessValue": "Provides the entire server-side contract the demo depends on: a liveness signal, a paginated read path, and a single write path, all backed by durable PostgreSQL storage.",
+      "mermaidDiagram": "graph TD\n  subgraph System[FastAPI Backend]\n    H[GET / health]\n    L[GET /api/items list]\n    C[POST /api/items create]\n  end\n  L -->|read| DB[(items table)]\n  C -->|insert| DB"
+    },
+    "cdf46510": {
+      "businessValue": "Gives the user a single read-only view that confirms backend connectivity and shows the current item catalog, with an explicit empty state when no items exist.",
+      "mermaidDiagram": "graph TD\n  V[Dashboard Viewer] --> APP[App on mount]\n  APP -->|GET /| ST[Backend status card]\n  APP -->|GET /api/items| LI[Item list / empty state]"
+    }
+  }
+}

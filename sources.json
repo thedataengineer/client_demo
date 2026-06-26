@@ -1,0 +1,11 @@
+{
+  "PRD-1 Real-time data visualization": ["real-time", "data", "visualization", "dashboard", "items", "display"],
+  "PRD-2 RESTful API integration": ["rest", "api", "endpoint", "integration", "fetch"],
+  "PRD-3 Persistent storage PostgreSQL": ["postgresql", "database", "persist", "storage", "items"],
+  "API-1 GET /api/items": ["get", "/api/items", "fetch all items", "list", "read"],
+  "API-2 POST /api/items": ["post", "/api/items", "create item", "insert", "new item"],
+  "API-3 GET / health": ["health", "check", "status", "backend"],
+  "ARCH-1 React frontend": ["react", "vite", "frontend", "ui", "user interface"],
+  "ARCH-2 FastAPI backend": ["fastapi", "backend", "business logic", "rest"],
+  "ARCH-3 PostgreSQL database": ["postgresql", "database", "sqlalchemy", "persist"]
+}
