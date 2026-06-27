@@ -29,6 +29,12 @@
       "scope": "GLOBAL",
       "id": "1782522504946-xnwqyw2",
       "supportingComponents": []
+    },
+    "PersonaSelector": {
+      "designSystemRef": "ds-persona-selector",
+      "scope": "GLOBAL",
+      "id": "1782565255134-27q348b",
+      "supportingComponents": []
     }
   },
   "MOLECULE": {
@@ -37,9 +43,21 @@
       "scope": "DOMAIN",
       "id": "1782522505131-ioecea5",
       "supportingComponents": ["ItemText", "StatusBadge", "StatusToggleButton", "DeleteButton"]
+    },
+    "AuditLogEntry": {
+      "designSystemRef": "ds-audit-log-entry",
+      "scope": "DOMAIN",
+      "id": "1782565255898-g9xcshq",
+      "supportingComponents": []
     }
   },
   "ORGANISM": {
+    "AuditLogList": {
+      "designSystemRef": "ds-audit-log-list",
+      "scope": "PAGE",
+      "id": "1782565255817-19tzaqt",
+      "supportingComponents": ["AuditLogEntry"]
+    },
     "ItemList": {
       "designSystemRef": "ds-item-list",
       "scope": "PAGE",

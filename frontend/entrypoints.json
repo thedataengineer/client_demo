@@ -29,11 +29,15 @@
       "personas": ["Admin", "User", "Viewer"],
       "type": "route",
       "category": "Items",
-      "status": "pending"
+      "status": "completed"
     }
   ],
-  "completed": [],
-  "remaining": [1],
+  "completed": [
+    { "epId": 1, "persona": "Admin", "outcomes": 2, "scenarios": 5, "steps": 11, "actions": 18, "apis": 6, "http": 200, "payloadPath": "ui_ep01_Admin_item-management.json" },
+    { "epId": 1, "persona": "User", "outcomes": 1, "scenarios": 4, "steps": 8, "actions": 17, "apis": 5, "http": 200, "payloadPath": "ui_ep01_User_item-management.json" },
+    { "epId": 1, "persona": "Viewer", "outcomes": 1, "scenarios": 3, "steps": 7, "actions": 14, "apis": 5, "http": 200, "payloadPath": "ui_ep01_Viewer_item-management.json" }
+  ],
+  "remaining": [],
   "orphans": {
     "deadCode": [],
     "subComponentsFolded": [],
