@@ -1,34 +1,45 @@
 {
-  "executiveSummary": "KCE_Demo is a three-tier reference application: a React/Vite single-page dashboard, a FastAPI service, and a PostgreSQL database, wired together over a small REST surface. The dashboard reads backend health and the current item catalog on load; the service exposes three endpoints that report health and list or create catalog items backed by a single 'items' table. The functional graph captures two actors: the Dashboard Viewer who consumes the read-only dashboard, and the System that owns the API and persistence. Scope is deliberately narrow, this is a demo stack, not a production product.",
+  "executiveSummary": "KCE_Demo_Rebuild is a single-page item-management application backed by a layered FastAPI service over PostgreSQL. Users create, browse, toggle completion on, and delete items through a React front end that talks to a small REST API. The backend mirrors those operations as System-persona flows and adds an immutable audit trail: PostgreSQL triggers record every INSERT, UPDATE, and DELETE on the items table into an audit_logs table, exposed through a read-only audit endpoint. A health probe rounds out the surface.\n\nThe functional graph covers two personas (User, System), four outcomes, ten scenarios, and nine REST APIs. The design is deliberately thin: no authentication guards, query-parameter inputs, and trigger-driven auditing rather than application-level logging.",
   "keyBusinessObjectives": [
-    "Demonstrate an end-to-end React + FastAPI + PostgreSQL slice that runs fully offline via Docker Compose",
-    "Expose a minimal REST contract (health, list items, create item) that the frontend consumes directly",
-    "Persist catalog items durably in PostgreSQL through SQLAlchemy",
-    "Surface backend connectivity status to the user on dashboard load"
+    "Let users manage a list of items end to end (create, read, update status, delete)",
+    "Guarantee a tamper-evident audit trail for all item mutations via database triggers",
+    "Expose item operations through a small, predictable REST contract",
+    "Provide a health probe for uptime monitoring",
+    "Keep the stack thin and demonstrable for rebuild/reference purposes"
   ],
   "keyStakeholders": [
-    { "role": "Dashboard Viewer", "interest": "Wants to see at a glance whether the backend is reachable and what items currently exist, without any edit controls." },
-    { "role": "System", "interest": "Owns the REST contract and the items table; responsible for serving reads, accepting writes, and reporting health." }
+    { "role": "User", "interest": "Fast, direct CRUD over items with immediate list refresh and visible completion state" },
+    { "role": "System", "interest": "Correct request handling, existence validation, persistence, and automatic audit capture" }
   ],
   "keyCapabilities": [
-    "Backend health reporting via GET /",
-    "Paginated item listing via GET /api/items (skip/limit)",
-    "Item creation via POST /api/items (name, description)",
-    "Read-only dashboard rendering of status and item list with empty-state handling",
-    "PostgreSQL persistence of the items table through SQLAlchemy"
+    "Item creation with required name and description",
+    "Paginated item retrieval",
+    "Completion-status toggle with existence validation",
+    "Item deletion with 404 guard",
+    "Trigger-based audit logging of INSERT/UPDATE/DELETE",
+    "Read-only audit log retrieval",
+    "Backend health check"
   ],
   "personaEnrichments": {
-    "System": { "description": "The FastAPI backend service. Exposes the REST contract, owns the SQLAlchemy-mapped 'items' table in PostgreSQL, and reports its own liveness." },
-    "Dashboard Viewer": { "description": "An end user of the React/Vite SPA. Opens the dashboard to view backend connectivity and the current catalog; the UI exposes no create or edit controls." }
+    "User": { "description": "The end user of the single-page app who manages items and monitors backend status and the item list." },
+    "System": { "description": "The backend service that handles REST requests, validates and persists item data, and records audit entries via PostgreSQL triggers." }
   },
   "outcomeEnrichments": {
-    "8b00b96e-e912-470b-aa25-fd29b44228b3": {
-      "businessValue": "Provides the entire server-side contract the demo depends on: a liveness signal, a paginated read path, and a single write path, all backed by durable PostgreSQL storage.",
-      "mermaidDiagram": "graph TD\n  subgraph System[FastAPI Backend]\n    H[GET / health]\n    L[GET /api/items list]\n    C[POST /api/items create]\n  end\n  L -->|read| DB[(items table)]\n  C -->|insert| DB"
+    "06dd9b83-3e48-46e8-9aa1-df7098e3acb1": {
+      "businessValue": "Gives users a complete, self-service item workflow on one page, removing any dependency on backend operators for routine list management.",
+      "mermaidDiagram": "graph TD\n  U[User] --> ADD[Add item]\n  U --> BROWSE[Browse and monitor list]\n  U --> TOGGLE[Toggle completion]\n  U --> DEL[Remove item]\n  ADD --> API[(Items REST API)]\n  TOGGLE --> API\n  DEL --> API\n  BROWSE --> API"
     },
-    "cdf46510": {
-      "businessValue": "Gives the user a single read-only view that confirms backend connectivity and shows the current item catalog, with an explicit empty state when no items exist.",
-      "mermaidDiagram": "graph TD\n  V[Dashboard Viewer] --> APP[App on mount]\n  APP -->|GET /| ST[Backend status card]\n  APP -->|GET /api/items| LI[Item list / empty state]"
+    "ce3c7fe7-d223-4722-817f-0848f36e4b9a": {
+      "businessValue": "Centralizes item CRUD with existence validation and automatic audit capture, so data integrity and traceability hold without extra application code.",
+      "mermaidDiagram": "graph TD\n  REQ[REST request] --> CREATE[Create item]\n  REQ --> LIST[List items]\n  REQ --> UPD[Update status]\n  REQ --> DELETE[Delete item]\n  CREATE --> ITEMS[(items table)]\n  UPD --> ITEMS\n  DELETE --> ITEMS\n  ITEMS -->|trigger| AUDIT[(audit_logs)]"
+    },
+    "70432abd-1ad4-4196-80d3-6aafc0c62550": {
+      "businessValue": "Surfaces the immutable audit trail so changes to tracked tables can be reviewed without direct database access.",
+      "mermaidDiagram": "graph TD\n  REQ[GET /api/audit] --> SVC[AuditService]\n  SVC --> REPO[AuditRepository]\n  REPO --> LOGS[(audit_logs)]\n  LOGS --> RESP[List AuditLogResponse]"
+    },
+    "e6449cb3-57d5-4e9b-8b3d-90a44a25b527": {
+      "businessValue": "Provides a dependency-free liveness signal for uptime monitoring and deployment checks.",
+      "mermaidDiagram": "graph TD\n  PROBE[GET /] --> H[read_root handler]\n  H --> OK[200 status ok]"
     }
   }
 }

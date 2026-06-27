@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-26T14:00:58.235544+00:00",
+  "timestamp": "2026-06-27T00:59:48.436734+00:00",
   "summary": {
     "personas": 2,
-    "outcomes": 2,
-    "scenarios": 5,
-    "steps": 5,
-    "actions": 5
+    "outcomes": 4,
+    "scenarios": 10,
+    "steps": 26,
+    "actions": 35
   },
   "checks": {
     "empty_nodes": {
@@ -15,43 +15,140 @@
     },
     "duplicate_scenarios": {
       "severity": "P1",
-      "count": 0,
-      "items": []
+      "count": 1,
+      "items": [
+        {
+          "scenario": "Update an item's completion status",
+          "count": 2,
+          "locations": [
+            {
+              "persona": "User",
+              "outcome": "Manage Items"
+            },
+            {
+              "persona": "System",
+              "outcome": "Manage Items"
+            }
+          ]
+        }
+      ]
     },
     "duplicate_outcomes": {
-      "count": 0,
-      "items": []
+      "count": 1,
+      "items": [
+        {
+          "outcome": "Manage Items",
+          "count": 2,
+          "personas": [
+            "User",
+            "System"
+          ],
+          "severity": "P2",
+          "same_persona_duplicate": false
+        }
+      ]
     },
     "citation_coverage": {
       "severity": "P1",
-      "total_nodes": 7,
-      "cited": 7,
-      "percentage": 100.0,
-      "uncited_items": [],
-      "uncited_total": 0
+      "total_nodes": 14,
+      "cited": 0,
+      "percentage": 0.0,
+      "uncited_items": [
+        {
+          "type": "outcome",
+          "persona": "User",
+          "name": "Manage Items"
+        },
+        {
+          "type": "outcome",
+          "persona": "System",
+          "name": "Monitor System Audit Activity"
+        },
+        {
+          "type": "outcome",
+          "persona": "System",
+          "name": "Manage Items"
+        },
+        {
+          "type": "outcome",
+          "persona": "System",
+          "name": "Monitor System Health"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Add a new item"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Browse and monitor the item list"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Update an item's completion status"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Remove an item from the list"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Retrieve audit log entries"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Create new item via POST API"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Retrieve paginated item list"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Update an item's completion status"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Delete item by ID with existence validation"
+        },
+        {
+          "type": "scenario",
+          "persona": "System",
+          "name": "Respond to backend health check request"
+        }
+      ],
+      "uncited_total": 14
     },
     "description_coverage": {
       "severity": "P1",
       "scenarios": {
-        "total": 5,
-        "with_description": 5,
+        "total": 10,
+        "with_description": 10,
         "percentage": 100.0
       },
       "system_actions": {
-        "total": 3,
-        "with_description": 3,
+        "total": 25,
+        "with_description": 25,
         "percentage": 100.0,
         "missing_samples": []
       },
       "human_actions": {
-        "total": 2,
-        "with_description": 2,
+        "total": 10,
+        "with_description": 10,
         "note": "Human actions don't require descriptions unless there's a constraint"
       }
     },
     "platform_agnostic": {
       "severity": "P1",
-      "total_human_actions": 2,
+      "total_human_actions": 10,
       "violations": 0,
       "compliance_percentage": 100.0,
       "items": [],
@@ -61,24 +158,24 @@
       "severity": "P1",
       "personas": [
         {
-          "persona": "System",
+          "persona": "User",
           "outcomes": 1,
-          "scenarios": 3,
-          "steps": 3,
-          "actions": 3,
+          "scenarios": 4,
+          "steps": 7,
+          "actions": 10,
+          "scenario_share": 40.0,
+          "flags": []
+        },
+        {
+          "persona": "System",
+          "outcomes": 3,
+          "scenarios": 6,
+          "steps": 19,
+          "actions": 25,
           "scenario_share": 60.0,
           "flags": [
             "BLOATED: holds 60.0% of all scenarios"
           ]
-        },
-        {
-          "persona": "Dashboard Viewer",
-          "outcomes": 1,
-          "scenarios": 2,
-          "steps": 2,
-          "actions": 2,
-          "scenario_share": 40.0,
-          "flags": []
         }
       ],
       "flagged_count": 1
@@ -89,102 +186,14 @@
       "items": []
     },
     "source_coverage": {
-      "severity": "P0",
-      "total_stories": 9,
-      "full": 7,
-      "partial": 1,
-      "missing": 1,
-      "items": [
-        {
-          "story": "PRD-1 Real-time data visualization",
-          "status": "FULL",
-          "found": 4,
-          "total": 6,
-          "missing_keywords": [
-            "real-time",
-            "visualization"
-          ]
-        },
-        {
-          "story": "PRD-2 RESTful API integration",
-          "status": "FULL",
-          "found": 4,
-          "total": 5,
-          "missing_keywords": [
-            "integration"
-          ]
-        },
-        {
-          "story": "PRD-3 Persistent storage PostgreSQL",
-          "status": "FULL",
-          "found": 4,
-          "total": 5,
-          "missing_keywords": [
-            "storage"
-          ]
-        },
-        {
-          "story": "API-1 GET /api/items",
-          "status": "FULL",
-          "found": 4,
-          "total": 5,
-          "missing_keywords": [
-            "fetch all items"
-          ]
-        },
-        {
-          "story": "API-2 POST /api/items",
-          "status": "FULL",
-          "found": 4,
-          "total": 5,
-          "missing_keywords": [
-            "create item"
-          ]
-        },
-        {
-          "story": "API-3 GET / health",
-          "status": "FULL",
-          "found": 4,
-          "total": 4,
-          "missing_keywords": []
-        },
-        {
-          "story": "ARCH-1 React frontend",
-          "status": "MISSING",
-          "found": 0,
-          "total": 5,
-          "missing_keywords": [
-            "react",
-            "vite",
-            "frontend",
-            "ui",
-            "user interface"
-          ]
-        },
-        {
-          "story": "ARCH-2 FastAPI backend",
-          "status": "PARTIAL",
-          "found": 2,
-          "total": 4,
-          "missing_keywords": [
-            "fastapi",
-            "business logic"
-          ]
-        },
-        {
-          "story": "ARCH-3 PostgreSQL database",
-          "status": "FULL",
-          "found": 4,
-          "total": 4,
-          "missing_keywords": []
-        }
-      ]
+      "severity": "N/A",
+      "note": "No sources file provided. Use --sources <file.json> or let Claude check via Documents MCP."
     }
   },
   "overall": {
     "p0_issues": 0,
-    "p1_issues": 1,
-    "p2_issues": 0,
+    "p1_issues": 3,
+    "p2_issues": 1,
     "health": "HEALTHY"
   }
 }

@@ -1,0 +1,299 @@
+{
+  "payload": {
+    "personas": [
+      {
+        "persona": "Viewer",
+        "description": null,
+        "outcomes": [
+          {
+            "outcome": "Monitor Items and Audit Activity",
+            "description": "Read-only access to browse all items from the database and review the full audit log trail. Viewer cannot add items, change completion status, or delete items.",
+            "scenarios": [
+              {
+                "scenario": "Browse items and verify gateway connectivity",
+                "description": "Viewer arrives at the Item Management page. The app simultaneously checks gateway connectivity and loads all items from the database. The Viewer observes each item's name, description, and completion status. An empty state message is shown when no items exist.",
+                "citations": [
+                  { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                ],
+                "steps": [
+                  {
+                    "step": "Load page data on arrival",
+                    "actions": [
+                      {
+                        "action": "Retrieve the gateway health status",
+                        "description": "Sends a GET request to the gateway root endpoint with the X-Persona: Viewer header. The returned message populates the Gateway Status display. On connection failure the status shows 'Error connecting to gateway'.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "http://localhost:8080/",
+                            "request": "Headers: X-Persona (Viewer), Content-Type: application/json",
+                            "response": "{ message: string }"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Retrieve the items list",
+                        "description": "Sends a GET request to the gateway items endpoint with the X-Persona: Viewer header. Returns the full list of items stored in the database. On error, logs to the browser console.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "http://localhost:8080/api/items",
+                            "request": "Headers: X-Persona (Viewer), Content-Type: application/json",
+                            "response": "Array of item objects: [ { id, name, description, completed } ]"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Observe the gateway connection status",
+                    "actions": [
+                      {
+                        "action": "Observe the gateway status message",
+                        "description": "label: Gateway Status; source: status state variable; default: 'Loading...'; on success: the message string returned by the gateway; on error: 'Error connecting to gateway'; formatting: plain text displayed in the Gateway Status card heading",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Observe each item in the list",
+                    "actions": [
+                      {
+                        "action": "Observe item name",
+                        "description": "label: Name; source: item.name; formatting: displayed in bold; emptyState: list shows 'No items found.' when no items exist",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Observe item description",
+                        "description": "label: Description; source: item.description; formatting: plain text displayed after a colon following the item name; emptyState: list shows 'No items found.' when no items exist",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Observe item completion status",
+                        "description": "label: Completion Status; source: item.completed (boolean); formatting: CSS class 'completed' applied to the list row when true, no class when false (item appears as pending); visibleTo: all personas — status is reflected via row styling; the status-change control is hidden for Viewer (skipped)",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Review the audit log trail",
+                "description": "Viewer reads the audit log entries loaded from the audit service via the gateway. Each entry shows when an action occurred, what operation was performed, which database table was affected, and the record identifier. An empty state is shown when no logs exist.",
+                "citations": [
+                  { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                ],
+                "steps": [
+                  {
+                    "step": "Load audit log data from the gateway",
+                    "actions": [
+                      {
+                        "action": "Retrieve the audit log entries",
+                        "description": "Sends a GET request to the gateway audit endpoint with the X-Persona: Viewer header. Returns all audit log records from the audit service. On error, logs to the browser console.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "http://localhost:8080/api/audit",
+                            "request": "Headers: X-Persona (Viewer), Content-Type: application/json",
+                            "response": "Array of audit log objects: [ { id, created_at, action, table_name, record_id } ]"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Observe each audit log entry",
+                    "actions": [
+                      {
+                        "action": "Observe log timestamp",
+                        "description": "label: Timestamp; source: log.created_at; formatting: new Date(log.created_at).toLocaleString() — converts ISO timestamp to locale-specific date and time string; displayed in square brackets at the start of each entry",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Observe log action type",
+                        "description": "label: Action; source: log.action; formatting: plain text string displayed inline after the timestamp; describes the operation recorded (e.g. INSERT, UPDATE, DELETE)",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Observe log table name",
+                        "description": "label: Table Name; source: log.table_name; formatting: displayed as 'on table {table_name}' after the action value; identifies which database table was affected",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Observe log record identifier",
+                        "description": "label: Record ID; source: log.record_id; formatting: displayed as '(Record ID: {record_id})' at the end of each log entry; identifies the specific database record that was affected",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Switch the active persona to control gateway request permissions",
+                "description": "Any user on the page selects a persona value from the persona selector. The selection updates the X-Persona request header used on all subsequent calls to the gateway and triggers an immediate reload of items and audit log data reflecting the new persona's access level.",
+                "citations": [
+                  { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                ],
+                "steps": [
+                  {
+                    "step": "Specify the active persona",
+                    "actions": [
+                      {
+                        "action": "Select the active persona",
+                        "description": "label: Persona; type: enum; required: true; default: Admin; options: Admin, User, Viewer; sets the X-Persona header value used on all subsequent API requests to the gateway; triggers re-fetch of items and audit logs via useEffect dependency on persona state",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Reload data with the updated persona header",
+                    "actions": [
+                      {
+                        "action": "Retrieve the items list with the updated persona header",
+                        "description": "Refetches all items from the gateway using the newly selected X-Persona header value. Gateway enforces RBAC rules for the new persona.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "http://localhost:8080/api/items",
+                            "request": "Headers: X-Persona (updated value), Content-Type: application/json",
+                            "response": "Array of item objects: [ { id, name, description, completed } ]"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      },
+                      {
+                        "action": "Retrieve the audit log entries with the updated persona header",
+                        "description": "Refetches all audit log entries from the gateway using the newly selected X-Persona header value.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "http://localhost:8080/api/audit",
+                            "request": "Headers: X-Persona (updated value), Content-Type: application/json",
+                            "response": "Array of audit log objects: [ { id, created_at, action, table_name, record_id } ]"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx" }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "audit": {
+    "entryPoint": "/",
+    "persona": "Viewer",
+    "filesRead": ["frontend/src/App.jsx"],
+    "skippedComponents": [
+      { "file": "frontend/src/App.css", "reason": "Pure styling, no interactive state or API calls" },
+      { "file": "frontend/src/main.jsx", "reason": "Entry point that renders App — no state or API calls" },
+      { "file": "frontend/src/assets/react.svg", "reason": "Static image asset" },
+      { "file": "frontend/src/assets/hero.png", "reason": "Static image asset" },
+      { "file": "frontend/src/assets/vite.svg", "reason": "Static image asset" },
+      { "file": "frontend/src/index.css", "reason": "Pure global styling, no interactive state" }
+    ],
+    "skippedForVisibility": [
+      {
+        "what": "Add New Item form (name input, description input, Add submit control)",
+        "gate": "persona !== 'Viewer' (App.jsx line 120)",
+        "visibleTo": "Admin and User only",
+        "currentPersona": "Viewer"
+      },
+      {
+        "what": "Complete/Undo status control per item row",
+        "gate": "persona !== 'Viewer' (App.jsx line 153)",
+        "visibleTo": "Admin and User only",
+        "currentPersona": "Viewer"
+      },
+      {
+        "what": "Delete item control per item row",
+        "gate": "persona === 'Admin' (App.jsx line 158)",
+        "visibleTo": "Admin only",
+        "currentPersona": "Viewer"
+      }
+    ],
+    "codeGraphSearches": [
+      {
+        "query": "Item Management Viewer browse items audit logs frontend",
+        "reason": "Mandatory hygiene sweep — Code_Graph_Search tool was not available in this execution environment; fallback to Bash find and grep across all src/ files",
+        "hits": 0,
+        "filesAddedToRead": [],
+        "note": "Bash find confirmed App.jsx is the sole source file containing state and fetch calls. No additional files to read."
+      }
+    ],
+    "warnings": [
+      {
+        "type": "validators_unavailable",
+        "note": "validate.py schema subcommand exited 3 (jsonschema not installed) — schema validated via Step B reasoning checks only. All other subcommands (rule-a, path-linked, descriptions, forbidden, citations, field-coverage) exited 0."
+      },
+      {
+        "type": "cgs_tool_unavailable",
+        "note": "Code_Graph_Search tool was not present in the execution environment. Mandatory hygiene sweep performed via Bash find/grep on the full src/ directory. Confirmed App.jsx is the only source file with state and fetch calls."
+      },
+      {
+        "type": "code_ontology_id_missing",
+        "note": "CODE_ONTOLOGY_ID was not provided. Code_Graph_Search fallback to repository_name='frontend' was also inapplicable because the tool was unavailable."
+      }
+    ],
+    "validatorsRun": true,
+    "stats": {
+      "scenarios": 3,
+      "steps": 7,
+      "actions": 14,
+      "actionsWithApis": 5,
+      "fieldsEnumerated": 7,
+      "filesRead": 1,
+      "codeGraphSearchCount": 1,
+      "actionsSkippedForOtherPersonas": 3
+    }
+  }
+}

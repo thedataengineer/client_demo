@@ -1,0 +1,37 @@
+{
+  "project": "KCE_Demo",
+  "projectUuid": "c1753976-aef3-468a-b753-7ca2bfe00456",
+  "framework": "fastapi",
+  "backendRepo": "/Users/yakarteek/code/work/kce-demo/backend",
+  "generatedAt": "2026-06-26T00:00:00Z",
+  "personas": [
+    { "name": "System", "source": "mechanical mapping", "isExisting": false },
+    { "name": "External System", "source": "mechanical mapping", "isExisting": false }
+  ],
+  "graphqlGranularity": null,
+  "graphqlOperations": [],
+  "totalEntryPoints": 3,
+  "entryPoints": [
+    {
+      "id": 1, "type": "REST", "httpMethod": "GET", "absoluteUrl": "/",
+      "handlerFunction": "read_root", "file": "main.py", "line": 51,
+      "parameters": [], "responseType": "{status, message}",
+      "authGuards": [], "category": "Health", "status": "done"
+    },
+    {
+      "id": 2, "type": "REST", "httpMethod": "GET", "absoluteUrl": "/api/items",
+      "handlerFunction": "read_items", "file": "main.py", "line": 55,
+      "parameters": ["skip: int (query)", "limit: int (query)"],
+      "responseType": "List[Item]", "authGuards": [], "category": "Catalog", "status": "done"
+    },
+    {
+      "id": 3, "type": "REST", "httpMethod": "POST", "absoluteUrl": "/api/items",
+      "handlerFunction": "create_item", "file": "main.py", "line": 60,
+      "parameters": ["name: str (query)", "description: str (query)"],
+      "responseType": "Item", "authGuards": [], "category": "Catalog", "status": "done"
+    }
+  ],
+  "completed": [1, 2, 3],
+  "remaining": [],
+  "orphans": { "deadCode": [], "orphanHandlersFolded": [], "routesWithNoFrontendCaller": [] }
+}

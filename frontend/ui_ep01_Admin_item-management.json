@@ -1,0 +1,338 @@
+{
+  "payload": {
+    "personas": [
+      {
+        "persona": "Admin",
+        "description": null,
+        "outcomes": [
+          {
+            "outcome": "Manage Items",
+            "description": "Create, browse, update completion status, and delete items. Admin has full CRUD access; the delete control is exclusive to Admin.",
+            "scenarios": [
+              {
+                "scenario": "Browse items from the database",
+                "description": "Admin navigates to the root route. On load, the app checks gateway connectivity and fetches the full items list via the gateway with X-Persona: Admin header. Each item row shows name, description, and completion state. Admin sees both the status control and the delete control on every row.",
+                "citations": [
+                  {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                ],
+                "steps": [
+                  {
+                    "step": "Initialize page data on mount",
+                    "actions": [
+                      {
+                        "action": "Retrieve gateway connectivity status",
+                        "description": "Automatic on mount and on persona change. Sends GET / to the gateway with X-Persona header. Result displayed as 'Gateway Status: {message}'. Error falls back to 'Error connecting to gateway'.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/",
+                            "request": "Header: X-Persona: Admin",
+                            "response": "{message: string} — gateway health message"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      },
+                      {
+                        "action": "Retrieve items from the database",
+                        "description": "Fetches all items via GET /api/items with X-Persona: Admin header. Returns an array of item objects.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/api/items",
+                            "request": "Header: X-Persona: Admin",
+                            "response": "Array of [{id, name, description, completed}]"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Review gateway status",
+                    "actions": [
+                      {
+                        "action": "Observe gateway status message",
+                        "description": "label: Gateway Status; source: state.status; displays the message returned by GET /; shows 'Loading...' initially and 'Error connecting to gateway' on failure.",
+                        "apis": []
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Review loaded items",
+                    "actions": [
+                      {
+                        "action": "Observe item name",
+                        "description": "label: Name; source: item.name; displayed in bold as the primary item identifier per row.",
+                        "apis": []
+                      },
+                      {
+                        "action": "Observe item description",
+                        "description": "label: Description; source: item.description; displayed as plain text after the name on the same row.",
+                        "apis": []
+                      },
+                      {
+                        "action": "Observe item completion status",
+                        "description": "label: Completion Status; source: item.completed (boolean); row carries CSS class 'completed' when true. The status control label shows 'Undo' when item.completed is true and 'Complete' when false. Empty state: 'No items found.' when items array is empty.",
+                        "apis": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Create a new item",
+                "description": "Admin fills the Add New Item form with a name and description and submits. The form is hidden for Viewer persona (gate: persona !== 'Viewer'); Admin satisfies this gate. Both fields are required and validated client-side (non-empty after trim). On success, the items list and audit logs refresh automatically.",
+                "citations": [
+                  {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                ],
+                "steps": [
+                  {
+                    "step": "Specify new item details",
+                    "actions": [
+                      {
+                        "action": "Provide item name",
+                        "description": "label: Name; type: text; required: true; validation: non-empty after trim (client-side guard prevents submission if blank); placeholder: 'Name'.",
+                        "apis": [],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      },
+                      {
+                        "action": "Provide item description",
+                        "description": "label: Description; type: text; required: true; validation: non-empty after trim (client-side guard prevents submission if blank); placeholder: 'Description'.",
+                        "apis": []
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Submit the new item",
+                    "actions": [
+                      {
+                        "action": "Submit the new item",
+                        "description": "POST /api/items with name and description as URL-encoded query parameters. Unauthorized (non-2xx) response triggers an alert. On success, form fields reset and the items list plus audit logs refresh.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "POST",
+                            "url": "/api/items?name={name}&description={description}",
+                            "request": "Header: X-Persona: Admin; query params: name (URL-encoded), description (URL-encoded)",
+                            "response": "Created item object; HTTP 401 if persona unauthorized"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Update an item's completion status",
+                "description": "Admin selects the Complete or Undo control on a listed item to flip its completed state. The control is hidden for Viewer persona (gate: persona !== 'Viewer'); Admin satisfies this gate. On success, the items list and audit logs refresh.",
+                "citations": [
+                  {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                ],
+                "steps": [
+                  {
+                    "step": "Identify the item to update",
+                    "actions": [
+                      {
+                        "action": "Choose the item whose completion status to change",
+                        "description": "Admin identifies the target item in the list by its name and current completion state. The status control shows 'Complete' when not complete and 'Undo' when already complete.",
+                        "apis": []
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Submit the status change",
+                    "actions": [
+                      {
+                        "action": "Submit completion status update",
+                        "description": "PUT /api/items/{id}?completed={boolean} where completed is the inverse of the current item.completed value. Unauthorized response triggers an alert. On success, items list and audit logs refresh.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "PUT",
+                            "url": "/api/items/{id}?completed={completed}",
+                            "request": "Header: X-Persona: Admin; path param: id (item id); query param: completed (boolean, inverse of current status)",
+                            "response": "HTTP 200 on success; HTTP 401 if persona unauthorized"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Delete an item",
+                "description": "Admin selects the Delete control on a listed item to permanently remove it. The Delete control renders only when persona === 'Admin' (RBAC gate — exclusive to Admin). No confirmation prompt is shown; deletion is immediate. On success, the items list and audit logs refresh.",
+                "citations": [
+                  {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                ],
+                "steps": [
+                  {
+                    "step": "Identify the item to remove",
+                    "actions": [
+                      {
+                        "action": "Choose the item to delete",
+                        "description": "Admin identifies the target item in the list by its name and description. The Delete control is visible only when persona === 'Admin' (App.jsx line 158); other personas do not see this control.",
+                        "apis": []
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Remove the item",
+                    "actions": [
+                      {
+                        "action": "Delete the selected item",
+                        "description": "DELETE /api/items/{id} with X-Persona: Admin header. No confirmation prompt is shown before deletion. Unauthorized response triggers an alert. On success, items list and audit logs refresh.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "DELETE",
+                            "url": "/api/items/{id}",
+                            "request": "Header: X-Persona: Admin; path param: id (item id)",
+                            "response": "HTTP 200 on success; HTTP 401 if persona unauthorized"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "outcome": "Review Audit Logs",
+            "description": "View the chronological audit trail recorded by the audit service. Logs load on page mount and refresh after every create, status-update, or delete operation.",
+            "scenarios": [
+              {
+                "scenario": "Review recorded audit log entries",
+                "description": "Admin views the Audit Logs section which lists all audit events from the audit service in chronological order. Logs are loaded automatically on page mount and after each write operation. All personas can view audit logs; no RBAC gate restricts this section.",
+                "citations": [
+                  {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                ],
+                "steps": [
+                  {
+                    "step": "Load audit log entries",
+                    "actions": [
+                      {
+                        "action": "Retrieve audit log entries",
+                        "description": "GET /api/audit with X-Persona: Admin header. Called on mount and after each write operation (create, status update, delete). Returns chronological list of audit records.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/api/audit",
+                            "request": "Header: X-Persona: Admin",
+                            "response": "Array of [{id, action, table_name, record_id, created_at}]"
+                          }
+                        ],
+                        "citations": [
+                          {"type": "code", "name": "App.jsx", "reference": "frontend/src/App.jsx"}
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Review audit entry details",
+                    "actions": [
+                      {
+                        "action": "Observe audit entry timestamp",
+                        "description": "label: Timestamp; source: log.created_at; formatted via new Date(log.created_at).toLocaleString() as a locale-aware date/time string. Displayed in square brackets at the start of each log row.",
+                        "apis": []
+                      },
+                      {
+                        "action": "Observe action recorded in the log",
+                        "description": "label: Action; source: log.action; the database operation recorded (e.g., INSERT, UPDATE, DELETE). Displayed after the timestamp.",
+                        "apis": []
+                      },
+                      {
+                        "action": "Observe affected table name",
+                        "description": "label: Table; source: log.table_name; the database table on which the audit event occurred. Displayed as 'on table {table_name}'.",
+                        "apis": []
+                      },
+                      {
+                        "action": "Observe affected record identifier",
+                        "description": "label: Record ID; source: log.record_id; the primary key of the affected record. Displayed as '(Record ID: {record_id})'.",
+                        "apis": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "audit": {
+    "entryPoint": "/",
+    "persona": "Admin",
+    "filesRead": ["frontend/src/App.jsx"],
+    "declaredFields": [
+      {"source": "App.jsx", "code": "newName", "label": "Name", "editable": true, "widget": "text input"},
+      {"source": "App.jsx", "code": "newDescription", "label": "Description", "editable": true, "widget": "text input"}
+    ],
+    "skippedComponents": [
+      {"file": "frontend/src/App.css", "reason": "Pure CSS styling, no state or API calls"},
+      {"file": "frontend/src/main.jsx", "reason": "App entry point only — mounts App component, no feature logic"},
+      {"file": "frontend/src/assets/react.svg", "reason": "Static SVG asset, no interaction"},
+      {"file": "frontend/src/assets/vite.svg", "reason": "Static SVG asset, no interaction"},
+      {"file": "frontend/src/assets/hero.png", "reason": "Static image asset, no interaction"},
+      {"file": "frontend/src/index.css", "reason": "Pure CSS styling, no state or API calls"}
+    ],
+    "skippedForVisibility": [],
+    "codeGraphSearches": [
+      {
+        "query": "Item management RBAC gateway fetch create delete Admin persona X-Persona",
+        "reason": "Mandatory hygiene sweep. Code_Graph_Search tool unavailable in this environment; performed grep-based file sweep across frontend/src/ as fallback. All API calls, state hooks, and visibility gates confirmed entirely in App.jsx.",
+        "hits": 1,
+        "filesAddedToRead": []
+      }
+    ],
+    "warnings": [
+      {
+        "type": "validators_unavailable",
+        "note": "validate.py schema subcommand exited 3 — jsonschema package not installed. All other subcommands (rule-a, path-linked, descriptions, forbidden, citations, field-coverage, citation-completeness) passed exit 0."
+      },
+      {
+        "type": "code_graph_unavailable",
+        "note": "Code_Graph_Search tool is not registered in this execution environment. Mandatory hygiene sweep performed via bash grep/find across frontend/src/. Single-component SPA: all state, API calls, and RBAC gates live in App.jsx."
+      },
+      {
+        "type": "cgs_unscoped",
+        "note": "CODE_ONTOLOGY_ID was not provided. Would have used INDEXED_REPO_NAME='frontend' as fallback if Code_Graph_Search tool were available."
+      },
+      {
+        "type": "visibility_gates_found",
+        "note": "Three visibility gates found in App.jsx. Gate 1: 'persona !== Viewer' at line 120 (Add New Item form) — Admin satisfies, included. Gate 2: 'persona !== Viewer' at line 153 (status control) — Admin satisfies, included. Gate 3: 'persona === Admin' at line 158 (Delete control) — Admin satisfies, included. No content excluded for Admin."
+      }
+    ],
+    "validatorsRun": true,
+    "stats": {
+      "scenarios": 5,
+      "steps": 11,
+      "actions": 18,
+      "actionsWithApis": 6,
+      "fieldsEnumerated": 2,
+      "filesRead": 1,
+      "codeGraphSearchCount": 1,
+      "actionsSkippedForOtherPersonas": 0
+    }
+  }
+}

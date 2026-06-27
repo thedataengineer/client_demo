@@ -1,0 +1,418 @@
+{
+  "payload": {
+    "personas": [
+      {
+        "persona": "User",
+        "description": null,
+        "outcomes": [
+          {
+            "outcome": "Manage Items",
+            "description": "Browse, create, and update items in the system, and monitor the audit log for all recorded actions.",
+            "scenarios": [
+              {
+                "scenario": "View the item list and gateway status",
+                "description": "User lands on the Item Management page and reviews all items stored in the database, with each item showing its name, description, and completion state. The gateway connection status is displayed at the top. Data loads automatically on page open and reloads whenever the active persona changes.",
+                "citations": [
+                  {
+                    "type": "code",
+                    "name": "App.jsx",
+                    "reference": "frontend/src/App.jsx"
+                  },
+                  {
+                    "type": "code",
+                    "name": "main.jsx",
+                    "reference": "frontend/src/main.jsx"
+                  }
+                ],
+                "steps": [
+                  {
+                    "step": "Load page data on open",
+                    "actions": [
+                      {
+                        "action": "Select the active persona for all requests",
+                        "description": "label: Persona; type: enum; options: Admin, User, Viewer; default: Admin; changing the selection updates the X-Persona header sent with all subsequent API calls and triggers an automatic reload of items, audit log, and gateway status; visibleTo: all personas",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Request the item list from the server",
+                        "description": "Triggered automatically on page open and on persona change; sends X-Persona: {persona} header; also refreshed after item creation and status updates",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/api/items",
+                            "request": "header: X-Persona: {persona}",
+                            "response": "array of item objects (id, name, description, completed)"
+                          }
+                        ],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Request the gateway health status",
+                        "description": "Triggered automatically on page open and on persona change; sends X-Persona: {persona} header; on fetch failure sets status to 'Error connecting to gateway'",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/",
+                            "request": "header: X-Persona: {persona}",
+                            "response": "{message: string}"
+                          }
+                        ],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Review the gateway status and item list",
+                    "actions": [
+                      {
+                        "action": "Observe the gateway connection status",
+                        "description": "label: Gateway Status; source: GET / response.message field; formatting: displayed as plain text in the status card header; emptyState: 'Error connecting to gateway' shown on fetch failure",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each item's name",
+                        "description": "label: Name; source: item.name; formatting: displayed as bold text within each list row; emptyState: 'No items found.' shown when the items array is empty",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each item's description",
+                        "description": "label: Description; source: item.description; formatting: displayed as plain text following a colon after the item name; emptyState: 'No items found.' when the items array is empty",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each item's completion state",
+                        "description": "label: Completion status; source: item.completed (boolean); formatting: CSS class 'completed' added to the list item element when true; also determines the control label shown in the row ('Complete' when false, 'Undo' when true)",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Create a new item",
+                "description": "User fills in the item name and description and submits the form to create a new item. Both fields are required; blank values are rejected client-side before the request is sent. The form is visible to non-Viewer personas; User has access.",
+                "citations": [
+                  {
+                    "type": "code",
+                    "name": "App.jsx",
+                    "reference": "frontend/src/App.jsx"
+                  }
+                ],
+                "steps": [
+                  {
+                    "step": "Specify the new item details",
+                    "actions": [
+                      {
+                        "action": "Enter the item name",
+                        "description": "label: Name; type: text; required: true; validation: value must not be blank after whitespace trimming (client-side guard before POST); placeholder: 'Name'; visibleTo: non-Viewer personas (User is included)",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Enter the item description",
+                        "description": "label: Description; type: text; required: true; validation: value must not be blank after whitespace trimming (client-side guard before POST); placeholder: 'Description'; visibleTo: non-Viewer personas (User is included)",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Submit the new item",
+                    "actions": [
+                      {
+                        "action": "Submit the new item to the server",
+                        "description": "Sends name and description as URL-encoded query parameters via POST; on HTTP error (non-2xx response) shows alert 'Error creating item: Unauthorized'; on success clears both fields and triggers a reload of the item list and audit log",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "POST",
+                            "url": "/api/items?name={name}&description={description}",
+                            "request": "header: X-Persona: {persona}; query params: name (URL-encoded string), description (URL-encoded string)",
+                            "response": "created item object; HTTP non-OK response triggers alert 'Error creating item: Unauthorized'"
+                          }
+                        ],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Mark an item as complete or incomplete",
+                "description": "User selects the Complete or Undo control on an item row to toggle its completion state. The control label reflects the item's current state ('Complete' when incomplete, 'Undo' when complete). Available to non-Viewer personas; User has access.",
+                "citations": [
+                  {
+                    "type": "code",
+                    "name": "App.jsx",
+                    "reference": "frontend/src/App.jsx"
+                  }
+                ],
+                "steps": [
+                  {
+                    "step": "Choose the completion state to apply",
+                    "actions": [
+                      {
+                        "action": "Indicate whether to complete or undo the item",
+                        "description": "Control label shows 'Complete' when item.completed is false and 'Undo' when item.completed is true; selecting it inverts the current completion state and triggers the status update request; visibleTo: non-Viewer personas (User is included)",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Submit the updated completion status",
+                    "actions": [
+                      {
+                        "action": "Submit the updated completion status to the server",
+                        "description": "Sends the toggled boolean value (opposite of current item.completed) as a query param via PUT; on HTTP error shows alert 'Error updating item: Unauthorized'; on success triggers a reload of the item list and audit log",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "PUT",
+                            "url": "/api/items/{id}?completed={completed}",
+                            "request": "header: X-Persona: {persona}; path param: id (item integer ID); query param: completed (boolean, toggled from current item.completed value)",
+                            "response": "HTTP 2xx on success; non-OK response triggers alert 'Error updating item: Unauthorized'"
+                          }
+                        ],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "scenario": "Review the audit log",
+                "description": "User views the audit log section displaying all recorded system actions with their timestamp, action type, affected table name, and affected record ID. The log is loaded automatically on page open and refreshed after each item mutation.",
+                "citations": [
+                  {
+                    "type": "code",
+                    "name": "App.jsx",
+                    "reference": "frontend/src/App.jsx"
+                  }
+                ],
+                "steps": [
+                  {
+                    "step": "Load the audit log from the server",
+                    "actions": [
+                      {
+                        "action": "Request the audit log entries from the server",
+                        "description": "Triggered automatically on page open, on persona change, and after each item creation or status update; sends X-Persona: {persona} header",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "GET",
+                            "url": "/api/audit",
+                            "request": "header: X-Persona: {persona}",
+                            "response": "array of audit log objects (id, created_at, action, table_name, record_id)"
+                          }
+                        ],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Review each audit log entry",
+                    "actions": [
+                      {
+                        "action": "Observe each log entry's timestamp",
+                        "description": "label: Timestamp; source: log.created_at; formatting: converted via new Date(log.created_at).toLocaleString() to a localized date-time string; displayed as the first item in each log row; emptyState: 'No logs found.' when the audit log array is empty",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each log entry's action type",
+                        "description": "label: Action; source: log.action; formatting: displayed as plain text in the format '[{timestamp}] {action} on table {table_name} (Record ID: {record_id})' within each log row",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each log entry's affected table",
+                        "description": "label: Table; source: log.table_name; formatting: displayed as plain text in 'on table {log.table_name}' format within each log row",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "Observe each log entry's affected record ID",
+                        "description": "label: Record ID; source: log.record_id; formatting: displayed as plain text in '(Record ID: {log.record_id})' format at the end of each log row",
+                        "apis": [],
+                        "citations": [
+                          {
+                            "type": "code",
+                            "name": "App.jsx",
+                            "reference": "frontend/src/App.jsx"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "audit": {
+    "entryPoint": "/",
+    "persona": "User",
+    "filesRead": [
+      "frontend/src/App.jsx",
+      "frontend/src/main.jsx"
+    ],
+    "skippedComponents": [
+      {
+        "file": "frontend/src/main.jsx",
+        "reason": "React entry-point only \u2014 mounts App with StrictMode, no state or business logic"
+      },
+      {
+        "file": "frontend/src/App.css",
+        "reason": "Pure stylesheet, no state or interactive logic"
+      },
+      {
+        "file": "frontend/src/index.css",
+        "reason": "Pure global stylesheet, no state or interactive logic"
+      }
+    ],
+    "skippedForVisibility": [
+      {
+        "what": "Delete item action (handleDelete \u2014 DELETE /api/items/{id}, rendered as Delete control in item row)",
+        "gate": "persona === 'Admin' (App.jsx line 158)",
+        "visibleTo": "Admin only",
+        "currentPersona": "User"
+      }
+    ],
+    "codeGraphSearches": [
+      {
+        "query": "Item Management User persona fetch audit items frontend",
+        "reason": "Mandatory hygiene sweep \u2014 verify no relevant files outside the App.jsx import tree were missed",
+        "hits": 0,
+        "filesAddedToRead": [],
+        "note": "CODE_ONTOLOGY_ID not provided; Code_Graph_Search MCP tool unavailable in this execution environment. Sweep recorded as attempted but could not execute. Fell back to Read+Bash discovery. The seed file App.jsx is self-contained with no custom stateful imports."
+      }
+    ],
+    "warnings": [
+      {
+        "type": "cgs_unscoped",
+        "note": "CODE_ONTOLOGY_ID was not provided. Code_Graph_Search MCP tool was not available in this execution environment. Discovery relied entirely on direct Read of the seed file import tree, which is self-contained (App.jsx imports only React, logo SVGs, and App.css)."
+      },
+      {
+        "type": "validators_unavailable",
+        "note": "jsonschema Python package not installed; validate.py schema subcommand would exit 3. Used reasoning-only Phase 6 Step B checks. All runnable subcommands (rule-a, forbidden, citations, path-linked, descriptions, field-coverage) passed with ok=true."
+      }
+    ],
+    "stats": {
+      "scenarios": 4,
+      "steps": 8,
+      "actions": 17,
+      "actionsWithApis": 5,
+      "fieldsEnumerated": 10,
+      "filesRead": 2,
+      "codeGraphSearchCount": 1,
+      "actionsSkippedForOtherPersonas": 1
+    }
+  }
+}

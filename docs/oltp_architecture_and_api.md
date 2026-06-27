@@ -1,6 +1,6 @@
 # OLTP Architecture and Audit Capability
 
-This document details the database-layer enhancements applied to harden the application for OLTP (Online Transaction Processing) workloads. **These changes shift state management to PostgreSQL**, guaranteeing audit integrity independently of the application layer.
+This document details the database-layer enhancements applied to harden the application for OLTP (Online Transaction Processing) workloads. **These changes shift state management to PostgreSQL**, guaranteeing audit integrity independently of the application layer. Furthermore, the architecture utilizes an API Gateway to enforce identity boundaries before traffic reaches the downstream services.
 
 ## Architectural Changes
 
@@ -15,15 +15,22 @@ To simulate high-read production environments, we deployed explicit compound ind
 - `ix_item_status_time`: Optimizes filtering by `completed` status and `updated_at` time bounds.
 - `ix_audit_table_action`: Secures sub-millisecond retrieval of audit records grouped by operation type.
 
+### 3. Persona Enforcement (API Gateway)
+All requests to the backend API now route through an API Gateway (Macroservice). The Gateway inspects the `X-Persona` header to apply RBAC (Role-Based Access Control) rules before passing traffic to the legacy Monolith or the new Audit Microservice.
+- **Admin**: Full access.
+- **User**: Read and Write access, blocked from `DELETE`.
+- **Viewer**: Read-only access across the board.
+
 ## API Endpoints
 
-### Data Mutation (Audited)
-These endpoints trigger the PostgreSQL functions transparently.
+### Data Mutation (Audited via Legacy Monolith)
+These endpoints are routed to the legacy monolith and trigger the PostgreSQL functions transparently.
 - `POST /api/items` - Creates a new item and auto-generates `created_at` / `updated_at`. Logs `INSERT`.
 - `PUT /api/items/{id}` - Toggles completion status and auto-updates `updated_at`. Logs `UPDATE`.
 - `DELETE /api/items/{id}` - Removes the record from the active table. Logs `DELETE`.
 
-### Audit Retrieval
+### Audit Retrieval (Strangler Fig Microservice)
+This endpoint is routed by the Gateway specifically to the new standalone Audit Microservice.
 - `GET /api/audit`
   - **Description**: Returns the chronological ledger of database mutations.
   - **Parameters**: `limit` (default 50)

@@ -1,0 +1,70 @@
+{
+  "ATOM": {
+    "DeleteButton": {
+      "designSystemRef": "ds-delete-button",
+      "scope": "GLOBAL",
+      "id": "1782522506175-3n940os",
+      "supportingComponents": []
+    },
+    "StatusToggleButton": {
+      "designSystemRef": "ds-status-toggle-button",
+      "scope": "GLOBAL",
+      "id": "1782522505818-zel4aqf",
+      "supportingComponents": []
+    },
+    "StatusBadge": {
+      "designSystemRef": "ds-status-badge",
+      "scope": "GLOBAL",
+      "id": "1782522505354-pd638ae",
+      "supportingComponents": []
+    },
+    "ItemText": {
+      "designSystemRef": "ds-item-text",
+      "scope": "GLOBAL",
+      "id": "1782522505250-kjfd1xx",
+      "supportingComponents": []
+    },
+    "StatusLabel": {
+      "designSystemRef": "ds-status-label",
+      "scope": "GLOBAL",
+      "id": "1782522504946-xnwqyw2",
+      "supportingComponents": []
+    }
+  },
+  "MOLECULE": {
+    "ItemRow": {
+      "designSystemRef": "ds-item-row",
+      "scope": "DOMAIN",
+      "id": "1782522505131-ioecea5",
+      "supportingComponents": ["ItemText", "StatusBadge", "StatusToggleButton", "DeleteButton"]
+    }
+  },
+  "ORGANISM": {
+    "ItemList": {
+      "designSystemRef": "ds-item-list",
+      "scope": "PAGE",
+      "id": "1782522505059-ev0f03s",
+      "supportingComponents": ["ItemRow"]
+    },
+    "BackendStatusCard": {
+      "designSystemRef": "ds-backend-status-card",
+      "scope": "PAGE",
+      "id": "1782522504847-sct13l0",
+      "supportingComponents": ["StatusLabel"]
+    },
+    "AddItemForm": {
+      "designSystemRef": "ds-add-item-form",
+      "scope": "PAGE",
+      "id": "1782522459968-ui0ioen",
+      "supportingComponents": []
+    }
+  },
+  "TEMPLATE": {
+    "DashboardLayout": {
+      "designSystemRef": "ds-dashboard-layout",
+      "scope": "GLOBAL",
+      "id": "1782522504769-0x3nmup",
+      "supportingComponents": ["ItemList", "BackendStatusCard", "AddItemForm"]
+    }
+  }
+}

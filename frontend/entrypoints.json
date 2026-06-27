@@ -1,0 +1,42 @@
+{
+  "project": "frontend",
+  "projectUuid": "9b021702-0353-4075-8dd8-c6a9c04e84da",
+  "framework": "react-vite-no-router",
+  "routerFile": "src/App.jsx",
+  "uiRepo": "/Users/yakarteek/code/work/kce-demo/frontend",
+  "stack": "spa",
+  "generatedAt": "2026-06-27T08:30:00Z",
+  "personas": [
+    { "name": "Admin", "source": "src/App.jsx:100", "isExisting": false },
+    { "name": "User", "source": "src/App.jsx:101", "isExisting": true },
+    { "name": "Viewer", "source": "src/App.jsx:102", "isExisting": false }
+  ],
+  "personasConfirmedAt": "2026-06-27T08:35:00Z",
+  "panels": [],
+  "totalEntryPoints": 1,
+  "entryPoints": [
+    {
+      "id": 1,
+      "route": "/",
+      "title": "Item Management",
+      "component": "src/App.jsx",
+      "pageDir": "src",
+      "auth": false,
+      "rbac": "X-Persona header (Admin/User/Viewer)",
+      "params": [],
+      "queryParams": [],
+      "variants": [],
+      "personas": ["Admin", "User", "Viewer"],
+      "type": "route",
+      "category": "Items",
+      "status": "pending"
+    }
+  ],
+  "completed": [],
+  "remaining": [1],
+  "orphans": {
+    "deadCode": [],
+    "subComponentsFolded": [],
+    "backendEndpointsWithNoFrontendCaller": []
+  }
+}

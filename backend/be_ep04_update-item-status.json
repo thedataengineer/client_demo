@@ -1,0 +1,139 @@
+{
+  "payload": {
+    "personas": [
+      {
+        "persona": "System",
+        "description": null,
+        "outcomes": [
+          {
+            "outcome": "Manage Items",
+            "description": "Create, retrieve, update, and delete items and track their completion status.",
+            "scenarios": [
+              {
+                "scenario": "Update an item's completion status",
+                "description": "System receives PUT /api/items/{item_id} with path param item_id (int) and query param completed (bool). ItemService.update_item_status fetches the item via ItemRepository.get_by_id (SELECT FROM items WHERE id = item_id); raises HTTPException(status_code=404, detail='Item not found') if the record is absent. If found, calls ItemRepository.update_status which sets item.completed = completed and calls db.commit() + db.refresh() (UPDATE items SET completed=<bool>, updated_at=utcnow WHERE id=item_id). PostgreSQL trigger audit_items_trigger fires INSERT INTO audit_logs(table_name='items', action='UPDATE', record_id=item_id, created_at=NOW()). Returns serialized ItemResponse.",
+                "citations": [
+                  { "type": "code", "name": "routes.py", "reference": "backend/app/api/routes.py" }
+                ],
+                "steps": [
+                  {
+                    "step": "Receive update request",
+                    "actions": [
+                      {
+                        "action": "Receive PUT /api/items/{item_id}",
+                        "description": "Path: item_id (int, required). Query: completed (bool, required). No auth guard. Response model: ItemResponse.",
+                        "apis": [
+                          {
+                            "type": "REST",
+                            "method": "PUT",
+                            "url": "/api/items/{item_id}",
+                            "request": "item_id: int (path, required), completed: bool (query, required)",
+                            "response": "ItemResponse{id: int, name: str, description: str, completed: bool, created_at: datetime, updated_at: datetime}"
+                          }
+                        ],
+                        "citations": [
+                          { "type": "code", "name": "routes.py", "reference": "backend/app/api/routes.py" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Validate item existence",
+                    "actions": [
+                      {
+                        "action": "Query item by ID",
+                        "description": "ItemRepository.get_by_id → db.query(Item).filter(Item.id == item_id).first() → SELECT FROM items WHERE id = item_id; returns None if no matching record",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "item_repository.py", "reference": "backend/app/repositories/item_repository.py" },
+                          { "type": "code", "name": "item.py", "reference": "backend/app/models/item.py" }
+                        ]
+                      },
+                      {
+                        "action": "Reject missing item",
+                        "description": "Raises HTTPException(status_code=404, detail='Item not found') if ItemRepository.get_by_id returns None",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "item_service.py", "reference": "backend/app/services/item_service.py" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Persist completion status update",
+                    "actions": [
+                      {
+                        "action": "Update item completion status",
+                        "description": "ItemRepository.update_status sets item.completed = completed and calls db.commit() + db.refresh() → UPDATE items SET completed=<bool>, updated_at=utcnow WHERE id=item_id. PostgreSQL trigger audit_items_trigger (defined in database.py init_db) fires INSERT INTO audit_logs(table_name='items', action='UPDATE', record_id=item_id, created_at=NOW())",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "item_repository.py", "reference": "backend/app/repositories/item_repository.py" },
+                          { "type": "code", "name": "database.py", "reference": "backend/app/core/database.py" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "step": "Return response",
+                    "actions": [
+                      {
+                        "action": "Return updated item",
+                        "description": "Serializes and returns ItemResponse with fields: id (int), name (str), description (str), completed (bool), created_at (datetime), updated_at (datetime). db.refresh() ensures updated_at reflects the committed timestamp.",
+                        "apis": [],
+                        "citations": [
+                          { "type": "code", "name": "item.py", "reference": "backend/app/schemas/item.py" }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "audit": {
+    "entryPoint": "PUT /api/items/{item_id}",
+    "persona": "System",
+    "filesRead": [
+      "backend/app/api/routes.py",
+      "backend/app/services/item_service.py",
+      "backend/app/schemas/item.py",
+      "backend/app/core/database.py",
+      "backend/app/repositories/item_repository.py",
+      "backend/app/models/item.py"
+    ],
+    "skippedComponents": [
+      { "file": "backend/app/core/config.py", "reason": "Config module only supplies DATABASE_URL to SQLAlchemy engine; no service logic or side effects relevant to this EP" }
+    ],
+    "skippedDependencies": [],
+    "sideEffects": [
+      { "kind": "db", "identifier": "ItemRepository → items (SELECT by id)", "matchedToAction": true },
+      { "kind": "db", "identifier": "ItemRepository → items (UPDATE completed)", "matchedToAction": true },
+      { "kind": "db", "identifier": "audit_trigger_func → audit_logs (INSERT via PostgreSQL trigger on items UPDATE)", "matchedToAction": true }
+    ],
+    "branchesAndErrors": [
+      { "what": "item not found", "code": "HTTPException 404 'Item not found'", "handledAs": "Reject missing item action in Validate item existence step" }
+    ],
+    "codeGraphSearchAvailable": false,
+    "validatorsRun": true,
+    "codeGraphSearches": [],
+    "warnings": [
+      { "type": "code_graph_unavailable", "note": "Code_Graph_Search tool not available this run — proceeded on Read+Glob+Grep only" },
+      { "type": "validators_unavailable", "note": "jsonschema not installed — schema subcommand degraded to prose checks (exit 3); all other subcommands (rule-a, path-linked, descriptions, persona, citations, coverage) passed exit 0; schema validated by reasoning" }
+    ],
+    "stats": {
+      "scenarios": 1,
+      "steps": 4,
+      "actions": 5,
+      "actionsWithApis": 1,
+      "fieldsEnumerated": 6,
+      "sideEffectsLogged": 3,
+      "sideEffectsMatched": 3,
+      "filesRead": 6,
+      "codeGraphSearchCount": 0
+    }
+  }
+}
