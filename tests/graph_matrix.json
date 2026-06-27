@@ -1,0 +1,144 @@
+{
+  "gateway": "http://localhost:8080",
+  "personas": [
+    "Admin",
+    "User",
+    "Viewer"
+  ],
+  "endpoints_from_graph": [
+    "DELETE /api/items/{id}",
+    "GET /",
+    "GET /api/audit",
+    "GET /api/items",
+    "POST /api/items",
+    "PUT /api/items/{id}"
+  ],
+  "matrix": [
+    {
+      "persona": "Admin",
+      "method": "GET",
+      "path": "/",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Admin",
+      "method": "GET",
+      "path": "/api/items",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Admin",
+      "method": "POST",
+      "path": "/api/items",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Admin",
+      "method": "PUT",
+      "path": "/api/items/{id}",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Admin",
+      "method": "DELETE",
+      "path": "/api/items/{id}",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Admin",
+      "method": "GET",
+      "path": "/api/audit",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "User",
+      "method": "GET",
+      "path": "/",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "User",
+      "method": "GET",
+      "path": "/api/items",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "User",
+      "method": "POST",
+      "path": "/api/items",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "User",
+      "method": "PUT",
+      "path": "/api/items/{id}",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "User",
+      "method": "DELETE",
+      "path": "/api/items/{id}",
+      "expected_status": 403,
+      "in_graph": false
+    },
+    {
+      "persona": "User",
+      "method": "GET",
+      "path": "/api/audit",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Viewer",
+      "method": "GET",
+      "path": "/",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Viewer",
+      "method": "GET",
+      "path": "/api/items",
+      "expected_status": 200,
+      "in_graph": true
+    },
+    {
+      "persona": "Viewer",
+      "method": "POST",
+      "path": "/api/items",
+      "expected_status": 403,
+      "in_graph": false
+    },
+    {
+      "persona": "Viewer",
+      "method": "PUT",
+      "path": "/api/items/{id}",
+      "expected_status": 403,
+      "in_graph": false
+    },
+    {
+      "persona": "Viewer",
+      "method": "DELETE",
+      "path": "/api/items/{id}",
+      "expected_status": 403,
+      "in_graph": false
+    },
+    {
+      "persona": "Viewer",
+      "method": "GET",
+      "path": "/api/audit",
+      "expected_status": 200,
+      "in_graph": true
+    }
+  ]
+}

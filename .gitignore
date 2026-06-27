@@ -23,3 +23,7 @@ rad.json
 TestResults.xml
 .breeze.json
 breezeai/
+
+# Python
+__pycache__/
+*.pyc
