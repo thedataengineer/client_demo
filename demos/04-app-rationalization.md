@@ -11,10 +11,13 @@ measured set, not an opinion. You can say which capabilities duplicate, which ar
 unique, what a consolidation target looks like, and what retirement actually
 removes.
 
-**Setup.** `KCE_Demo_Rebuild` is app A. App B is an adjacent item-tracker already
-onboarded to Breeze (call it `KCE_Adjacent_Tracker`). If you do not have a second
-project staged, the appendix shows how to stand one up in minutes from the same
-codebase with the audit capability removed, so the diff has something to show.
+**Setup.** Both apps are live in Breeze.
+
+- **App A** — `KCE_Demo_Rebuild`, uuid `9b021702-0353-4075-8dd8-c6a9c04e84da`.
+- **App B** — `KCE_Adjacent_Tracker`, uuid `574c1cee-21d0-4d9f-8d3f-2b531902b1e7`.
+  Codebase at `../kce-adjacent-tracker` (ports 8001 / 5174 / 5433). It is a real
+  trim of app A: item CRUD only, no gateway, no RBAC, no audit. The appendix
+  records how it was built if you need to rebuild it.
 
 **Audience.** Portfolio owners, enterprise architects, the CFO's technical proxy
 who signs off on retiring an app. **Run time.** 15 minutes.
@@ -35,23 +38,31 @@ overlap. The graph is about to turn the suspicion into a number.
 Pull both functional graphs and compare outcomes and APIs:
 
 ```
-Get_complete_functional_graph(KCE_Demo_Rebuild)        # app A
-Get_complete_functional_graph(KCE_Adjacent_Tracker)    # app B
+Get_complete_functional_graph(uuid="9b021702-0353-4075-8dd8-c6a9c04e84da")   # app A
+Get_complete_functional_graph(uuid="574c1cee-21d0-4d9f-8d3f-2b531902b1e7")   # app B
 ```
+
+The summary blocks alone make the case before you read a single scenario:
+
+- **App A** — 4 personas (Admin, User, Viewer, System), 7 outcomes, 6 endpoints
+  including `GET /api/audit`.
+- **App B** — 2 personas (System, User), 3 outcomes, 5 endpoints, no audit.
 
 Lay the outcomes side by side:
 
-| Capability | App A (KCE_Demo_Rebuild) | App B (Adjacent) |
+| Capability | App A (`KCE_Demo_Rebuild`) | App B (`KCE_Adjacent_Tracker`) |
 |---|---|---|
-| Manage Items (CRUD) | Yes, 4 endpoints | Yes, near-identical |
+| Manage Items (CRUD) | Yes, 4 endpoints | Yes, identical 4 endpoints |
 | Item completion toggle | Yes | Yes |
-| Audit trail (`GET /api/audit`) | Yes, trigger-based | No |
-| Role enforcement at gateway | Yes | Partial or none |
-| Health probe | Yes | Yes |
+| Health probe (`GET /`) | Yes | Yes |
+| Audit trail (`GET /api/audit`, "Monitor System Audit Activity") | Yes, trigger-based | **No outcome, no endpoint** |
+| Role enforcement (Admin / User / Viewer personas) | Yes, gateway-enforced | **No, single open User persona** |
 
-The overlap is the top rows: CRUD and completion are duplicated capability. The
-differentiators are audit and RBAC, and they live in app A. That table is the
-rationalization case, and every cell links to the scenario that backs it.
+The overlap is the top three rows: CRUD, completion, and health are duplicated
+capability. The differentiators are the bottom two, audit and RBAC, and they exist
+only in app A. That table is the rationalization case, and every cell links to the
+scenario that backs it. The "No" cells are provable absences: B's graph has no
+`Monitor System Audit Activity` outcome and no `Admin`/`Viewer` persona.
 
 ## Beat 3: Which app is the consolidation target (3 min)
 
@@ -76,15 +87,15 @@ Rationalization decks routinely undercount what dies with an app. Use B's graph 
 the demolition checklist:
 
 ```
-Get_complete_functional_graph(KCE_Adjacent_Tracker)
-Design_Graph_Search("...", KCE_Adjacent_Tracker)
-Code_Graph_Search("...", KCE_Adjacent_Tracker)
+Get_complete_functional_graph(uuid="574c1cee-21d0-4d9f-8d3f-2b531902b1e7")
 ```
 
 Every persona, endpoint, component, and file unique to B is a line item to migrate
-or knowingly drop. The graph turns "we think B is mostly redundant" into "B has N
-endpoints, M of them duplicated in A, K unique; here are the K." The K is the only
-real work in the cutover, and now it is enumerated.
+or knowingly drop. For this pair the math is small and exact: B has 5 endpoints,
+all 5 duplicated in A, 0 unique. K = 0. Retiring B removes no capability A does not
+already cover, so the cutover is pure decommission, not migration. That is the
+strongest rationalization verdict you can hand a CFO: the redundant app costs
+money and adds nothing the survivor lacks.
 
 ## Beat 5: Prove the survivor still holds (2 min)
 
@@ -111,10 +122,11 @@ number, not a narrative.
 
 ## The decision framing to leave on screen
 
-- **Duplicated capability** (CRUD, completion): consolidate onto A, retire in B.
+- **Duplicated capability** (CRUD, completion, health): consolidate onto A, retire
+  in B.
 - **Unique to A** (audit, RBAC): the reason A is the survivor.
-- **Unique to B** (the K endpoints): migrate or explicitly accept the loss. This
-  is the only line item that costs real engineering.
+- **Unique to B**: none (K = 0). Retiring B is a clean decommission with no
+  migration line item.
 
 ## The risk to name
 
@@ -125,16 +137,33 @@ graph does not see what the data obligations are.
 
 ---
 
-## Appendix: stand up the adjacent app for the demo
+## Appendix: how app B was built (for rebuild / reference)
 
-If you need app B staged, clone this repo to a second Breeze project and remove
-the audit capability so the diff is real:
+App B already exists as Breeze project `KCE_Adjacent_Tracker`
+(`574c1cee-21d0-4d9f-8d3f-2b531902b1e7`), codebase at `../kce-adjacent-tracker`.
+It was produced by trimming app A:
 
-1. Create the project: `Call_Create_Project_(name="KCE_Adjacent_Tracker")`.
-2. Point a copy of the codebase at it with `backend-audit/` and the
-   `/api/audit` gateway route removed, plus the audit trigger dropped from the DB
-   init.
-3. Run the functional and design passes against the trimmed codebase so B's graph
-   genuinely lacks the audit outcome and the `AuditLogList` component.
+1. **Codebase** — copied `backend/` and `frontend/` minus the audit surface:
+   removed the audit model/repository/service/schema, dropped the
+   `audit_trigger_func` trigger from `database.py`, deleted the persona selector
+   and audit-log panel from `App.jsx`, and pointed the frontend straight at the
+   backend (no gateway). Runs on shifted ports (8001 / 5174 / 5433) so it can sit
+   beside app A.
+2. **Project** — created via `Call_Create_Project_(name="KCE_Adjacent_Tracker")`;
+   uuid saved to `../kce-adjacent-tracker/.breeze.json`.
+3. **Functional graph** — authored the System (backend) and User (UI) subtrees
+   from the trimmed code and upserted to `/functional-graph/v2/upsert`. Result:
+   2 personas, 3 outcomes, 9 scenarios, 10 APIs, and no audit outcome or
+   `/api/audit` endpoint, which is what makes Beat 2's diff real.
 
-Now Beat 2's table is generated, not staged, and the overlap diff is live.
+Verify any time:
+
+```
+Get_complete_functional_graph(uuid="574c1cee-21d0-4d9f-8d3f-2b531902b1e7")
+```
+
+Optional follow-up if a demo wants the UI-component diff in Beat 4 to be live as
+well: run the design pass against `../kce-adjacent-tracker` so B's design graph
+carries the item components but not `PersonaSelector`, `AuditLogEntry`, or
+`AuditLogList`. The functional diff above already carries the rationalization
+verdict without it.
