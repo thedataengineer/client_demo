@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-27T00:59:48.436734+00:00",
+  "timestamp": "2026-06-27T13:06:57.466371+00:00",
   "summary": {
-    "personas": 2,
-    "outcomes": 4,
-    "scenarios": 10,
-    "steps": 26,
-    "actions": 35
+    "personas": 4,
+    "outcomes": 7,
+    "scenarios": 22,
+    "steps": 52,
+    "actions": 84
   },
   "checks": {
     "empty_nodes": {
@@ -15,10 +15,10 @@
     },
     "duplicate_scenarios": {
       "severity": "P1",
-      "count": 1,
+      "count": 2,
       "items": [
         {
-          "scenario": "Update an item's completion status",
+          "scenario": "Create a new item",
           "count": 2,
           "locations": [
             {
@@ -26,7 +26,25 @@
               "outcome": "Manage Items"
             },
             {
+              "persona": "Admin",
+              "outcome": "Manage Items"
+            }
+          ]
+        },
+        {
+          "scenario": "Update an item's completion status",
+          "count": 3,
+          "locations": [
+            {
+              "persona": "User",
+              "outcome": "Manage Items"
+            },
+            {
               "persona": "System",
+              "outcome": "Manage Items"
+            },
+            {
+              "persona": "Admin",
               "outcome": "Manage Items"
             }
           ]
@@ -38,10 +56,11 @@
       "items": [
         {
           "outcome": "Manage Items",
-          "count": 2,
+          "count": 3,
           "personas": [
             "User",
-            "System"
+            "System",
+            "Admin"
           ],
           "severity": "P2",
           "same_persona_duplicate": false
@@ -50,7 +69,7 @@
     },
     "citation_coverage": {
       "severity": "P1",
-      "total_nodes": 14,
+      "total_nodes": 29,
       "cited": 0,
       "percentage": 0.0,
       "uncited_items": [
@@ -75,6 +94,46 @@
           "name": "Monitor System Health"
         },
         {
+          "type": "outcome",
+          "persona": "Admin",
+          "name": "Manage Items"
+        },
+        {
+          "type": "outcome",
+          "persona": "Admin",
+          "name": "Review Audit Logs"
+        },
+        {
+          "type": "outcome",
+          "persona": "Viewer",
+          "name": "Monitor Items and Audit Activity"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Create a new item"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Mark an item as complete or incomplete"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "View the item list and gateway status"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Review the audit log"
+        },
+        {
+          "type": "scenario",
+          "persona": "User",
+          "name": "Update an item's completion status"
+        },
+        {
           "type": "scenario",
           "persona": "User",
           "name": "Add a new item"
@@ -83,11 +142,6 @@
           "type": "scenario",
           "persona": "User",
           "name": "Browse and monitor the item list"
-        },
-        {
-          "type": "scenario",
-          "persona": "User",
-          "name": "Update an item's completion status"
         },
         {
           "type": "scenario",
@@ -102,12 +156,7 @@
         {
           "type": "scenario",
           "persona": "System",
-          "name": "Create new item via POST API"
-        },
-        {
-          "type": "scenario",
-          "persona": "System",
-          "name": "Retrieve paginated item list"
+          "name": "Delete item by ID with existence validation"
         },
         {
           "type": "scenario",
@@ -117,21 +166,21 @@
         {
           "type": "scenario",
           "persona": "System",
-          "name": "Delete item by ID with existence validation"
+          "name": "Create new item via POST API"
         },
         {
           "type": "scenario",
           "persona": "System",
-          "name": "Respond to backend health check request"
+          "name": "Retrieve paginated item list"
         }
       ],
-      "uncited_total": 14
+      "uncited_total": 29
     },
     "description_coverage": {
       "severity": "P1",
       "scenarios": {
-        "total": 10,
-        "with_description": 10,
+        "total": 22,
+        "with_description": 22,
         "percentage": 100.0
       },
       "system_actions": {
@@ -141,18 +190,51 @@
         "missing_samples": []
       },
       "human_actions": {
-        "total": 10,
-        "with_description": 10,
+        "total": 59,
+        "with_description": 59,
         "note": "Human actions don't require descriptions unless there's a constraint"
       }
     },
     "platform_agnostic": {
       "severity": "P1",
-      "total_human_actions": 10,
-      "violations": 0,
-      "compliance_percentage": 100.0,
-      "items": [],
-      "total_violations": 0
+      "total_human_actions": 59,
+      "violations": 4,
+      "compliance_percentage": 93.2,
+      "items": [
+        {
+          "persona": "User",
+          "scenario": "Review the audit log",
+          "action": "Observe each log entry's affected table",
+          "forbidden_words": [
+            "tab"
+          ]
+        },
+        {
+          "persona": "Admin",
+          "scenario": "Browse items from the database",
+          "action": "Retrieve items from the database",
+          "forbidden_words": [
+            "tab"
+          ]
+        },
+        {
+          "persona": "Admin",
+          "scenario": "Review recorded audit log entries",
+          "action": "Observe affected table name",
+          "forbidden_words": [
+            "tab"
+          ]
+        },
+        {
+          "persona": "Viewer",
+          "scenario": "Review the audit log trail",
+          "action": "Observe log table name",
+          "forbidden_words": [
+            "tab"
+          ]
+        }
+      ],
+      "total_violations": 4
     },
     "persona_quality": {
       "severity": "P1",
@@ -160,10 +242,10 @@
         {
           "persona": "User",
           "outcomes": 1,
-          "scenarios": 4,
-          "steps": 7,
-          "actions": 10,
-          "scenario_share": 40.0,
+          "scenarios": 8,
+          "steps": 15,
+          "actions": 27,
+          "scenario_share": 36.4,
           "flags": []
         },
         {
@@ -172,28 +254,142 @@
           "scenarios": 6,
           "steps": 19,
           "actions": 25,
-          "scenario_share": 60.0,
-          "flags": [
-            "BLOATED: holds 60.0% of all scenarios"
-          ]
+          "scenario_share": 27.3,
+          "flags": []
+        },
+        {
+          "persona": "Admin",
+          "outcomes": 2,
+          "scenarios": 5,
+          "steps": 11,
+          "actions": 18,
+          "scenario_share": 22.7,
+          "flags": []
+        },
+        {
+          "persona": "Viewer",
+          "outcomes": 1,
+          "scenarios": 3,
+          "steps": 7,
+          "actions": 14,
+          "scenario_share": 13.6,
+          "flags": []
         }
       ],
-      "flagged_count": 1
+      "flagged_count": 0
     },
     "cross_persona_overlap": {
       "severity": "P2",
-      "count": 0,
-      "items": []
+      "count": 1,
+      "items": [
+        {
+          "keyword": "audit",
+          "personas": [
+            "Admin",
+            "System",
+            "User",
+            "Viewer"
+          ],
+          "count": 4
+        }
+      ]
     },
     "source_coverage": {
-      "severity": "N/A",
-      "note": "No sources file provided. Use --sources <file.json> or let Claude check via Documents MCP."
+      "severity": "P0",
+      "total_stories": 9,
+      "full": 7,
+      "partial": 2,
+      "missing": 0,
+      "items": [
+        {
+          "story": "PRD-1 Real-time data visualization",
+          "status": "PARTIAL",
+          "found": 3,
+          "total": 6,
+          "missing_keywords": [
+            "real-time",
+            "visualization",
+            "dashboard"
+          ]
+        },
+        {
+          "story": "PRD-2 RESTful API integration",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "integration"
+          ]
+        },
+        {
+          "story": "PRD-3 Persistent storage PostgreSQL",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "storage"
+          ]
+        },
+        {
+          "story": "API-1 GET /api/items",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "fetch all items"
+          ]
+        },
+        {
+          "story": "API-2 POST /api/items",
+          "status": "FULL",
+          "found": 4,
+          "total": 5,
+          "missing_keywords": [
+            "create item"
+          ]
+        },
+        {
+          "story": "API-3 GET / health",
+          "status": "FULL",
+          "found": 4,
+          "total": 4,
+          "missing_keywords": []
+        },
+        {
+          "story": "ARCH-1 React frontend",
+          "status": "PARTIAL",
+          "found": 1,
+          "total": 5,
+          "missing_keywords": [
+            "react",
+            "vite",
+            "frontend",
+            "user interface"
+          ]
+        },
+        {
+          "story": "ARCH-2 FastAPI backend",
+          "status": "FULL",
+          "found": 3,
+          "total": 4,
+          "missing_keywords": [
+            "business logic"
+          ]
+        },
+        {
+          "story": "ARCH-3 PostgreSQL database",
+          "status": "FULL",
+          "found": 4,
+          "total": 4,
+          "missing_keywords": []
+        }
+      ]
     }
   },
   "overall": {
     "p0_issues": 0,
-    "p1_issues": 3,
-    "p2_issues": 1,
-    "health": "HEALTHY"
+    "p1_issues": 7,
+    "p2_issues": 2,
+    "health": "NEEDS_ATTENTION"
   }
 }

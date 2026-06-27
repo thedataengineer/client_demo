@@ -1,45 +1,61 @@
 {
-  "executiveSummary": "KCE_Demo_Rebuild is a single-page item-management application backed by a layered FastAPI service over PostgreSQL. Users create, browse, toggle completion on, and delete items through a React front end that talks to a small REST API. The backend mirrors those operations as System-persona flows and adds an immutable audit trail: PostgreSQL triggers record every INSERT, UPDATE, and DELETE on the items table into an audit_logs table, exposed through a read-only audit endpoint. A health probe rounds out the surface.\n\nThe functional graph covers two personas (User, System), four outcomes, ten scenarios, and nine REST APIs. The design is deliberately thin: no authentication guards, query-parameter inputs, and trigger-driven auditing rather than application-level logging.",
+  "executiveSummary": "KCE_Demo_Rebuild is a single-page item-management application split across a React frontend and a service-oriented backend (gateway, item service, audit service, PostgreSQL with trigger-based audit capture). The frontend sends an X-Persona header (Admin, User, Viewer) on every request; the gateway enforces role-based access on writes. Admin gets full create/update/delete; User can create and toggle completion but not delete; Viewer is read-only. All write operations are recorded automatically in an immutable audit trail that every persona can read.\n\nThe functional graph captures both halves: the human-facing personas (Admin, User, Viewer) driving the UI, and the System persona representing the backend handlers (REST routes, repositories, DB triggers). Each UI action is linked to the REST call it issues, giving end-to-end traceability from a button click to the gateway endpoint and the audit row it produces.",
   "keyBusinessObjectives": [
-    "Let users manage a list of items end to end (create, read, update status, delete)",
-    "Guarantee a tamper-evident audit trail for all item mutations via database triggers",
-    "Expose item operations through a small, predictable REST contract",
-    "Provide a health probe for uptime monitoring",
-    "Keep the stack thin and demonstrable for rebuild/reference purposes"
+    "Enforce role-based access at the gateway so write permissions follow the active persona, not client trust",
+    "Guarantee an immutable, automatically captured audit trail for every data mutation via database triggers",
+    "Keep the read path open to all personas so items and audit activity stay observable",
+    "Maintain a single dashboard surface that adapts its controls to the caller's role",
+    "Preserve end-to-end traceability from UI action to REST endpoint to audit record"
   ],
   "keyStakeholders": [
-    { "role": "User", "interest": "Fast, direct CRUD over items with immediate list refresh and visible completion state" },
-    { "role": "System", "interest": "Correct request handling, existence validation, persistence, and automatic audit capture" }
+    { "role": "Admin", "interest": "Full lifecycle control over items (create, update status, delete) plus visibility into the complete audit trail" },
+    { "role": "User", "interest": "Day-to-day item creation and completion tracking without destructive delete rights" },
+    { "role": "Viewer", "interest": "Read-only oversight of item state and audit activity for monitoring and review" },
+    { "role": "System", "interest": "Correct handler behavior: input validation, existence checks, persistence, and trigger-based audit capture on every mutation" }
   ],
   "keyCapabilities": [
-    "Item creation with required name and description",
-    "Paginated item retrieval",
-    "Completion-status toggle with existence validation",
-    "Item deletion with 404 guard",
-    "Trigger-based audit logging of INSERT/UPDATE/DELETE",
-    "Read-only audit log retrieval",
-    "Backend health check"
+    "Persona-scoped RBAC enforced at the gateway via X-Persona header",
+    "Item CRUD with client-side validation and server-side existence checks",
+    "Completion-status toggling with immediate list refresh",
+    "Automatic audit capture through PostgreSQL AFTER-INSERT/UPDATE/DELETE triggers",
+    "Open audit-log read access across all personas",
+    "Gateway health/status surfacing on the dashboard",
+    "Live persona switching that re-scopes data under the new role"
   ],
   "personaEnrichments": {
-    "User": { "description": "The end user of the single-page app who manages items and monitors backend status and the item list." },
-    "System": { "description": "The backend service that handles REST requests, validates and persists item data, and records audit entries via PostgreSQL triggers." }
+    "Admin": { "description": "Full-access role. Sees and uses every control on the dashboard: add form, completion toggle, and the Admin-only delete button, plus the audit log." },
+    "User": { "description": "Standard role. Can create items and toggle completion status, but the delete control is hidden; retains full read access to items and audit logs." },
+    "Viewer": { "description": "Read-only role. The add form and all row-level write controls are hidden; can browse items, watch gateway status, and read the audit trail." },
+    "System": { "description": "Mechanical backend persona representing the gateway, item service, audit service, and database handlers that validate, persist, and audit each request." }
   },
   "outcomeEnrichments": {
     "06dd9b83-3e48-46e8-9aa1-df7098e3acb1": {
-      "businessValue": "Gives users a complete, self-service item workflow on one page, removing any dependency on backend operators for routine list management.",
-      "mermaidDiagram": "graph TD\n  U[User] --> ADD[Add item]\n  U --> BROWSE[Browse and monitor list]\n  U --> TOGGLE[Toggle completion]\n  U --> DEL[Remove item]\n  ADD --> API[(Items REST API)]\n  TOGGLE --> API\n  DEL --> API\n  BROWSE --> API"
+      "businessValue": "Gives the standard User the full non-destructive item workflow: create, browse, toggle completion, and read the audit log. This is the primary day-to-day surface and the bulk of UI interaction.",
+      "mermaidDiagram": "graph TD\n  U[User] -->|create / toggle| F[Item Dashboard]\n  F -->|POST/PUT /api/items| G[Gateway]\n  F -->|GET /api/items, /api/audit| G\n  G --> I[Item Service]\n  G --> A[Audit Service]\n  I --> DB[(PostgreSQL)]\n  DB -->|trigger| AL[(audit_logs)]"
     },
     "ce3c7fe7-d223-4722-817f-0848f36e4b9a": {
-      "businessValue": "Centralizes item CRUD with existence validation and automatic audit capture, so data integrity and traceability hold without extra application code.",
-      "mermaidDiagram": "graph TD\n  REQ[REST request] --> CREATE[Create item]\n  REQ --> LIST[List items]\n  REQ --> UPD[Update status]\n  REQ --> DELETE[Delete item]\n  CREATE --> ITEMS[(items table)]\n  UPD --> ITEMS\n  DELETE --> ITEMS\n  ITEMS -->|trigger| AUDIT[(audit_logs)]"
+      "businessValue": "Backend item CRUD with existence validation and trigger-driven audit capture. Ensures every create, update, and delete is persisted correctly and recorded, independent of which UI persona initiated it.",
+      "mermaidDiagram": "graph TD\n  R[REST Route] --> S[Item Service]\n  S --> Repo[Item Repository]\n  Repo --> DB[(items table)]\n  DB -->|AFTER INSERT/UPDATE/DELETE| T[audit_trigger_func]\n  T --> AL[(audit_logs)]"
     },
     "70432abd-1ad4-4196-80d3-6aafc0c62550": {
-      "businessValue": "Surfaces the immutable audit trail so changes to tracked tables can be reviewed without direct database access.",
-      "mermaidDiagram": "graph TD\n  REQ[GET /api/audit] --> SVC[AuditService]\n  SVC --> REPO[AuditRepository]\n  REPO --> LOGS[(audit_logs)]\n  LOGS --> RESP[List AuditLogResponse]"
+      "businessValue": "Exposes the recorded audit trail through the audit service. Turns the trigger-captured rows into a readable, chronological feed for oversight.",
+      "mermaidDiagram": "graph TD\n  Req[GET /api/audit] --> AS[Audit Service]\n  AS --> ARepo[Audit Repository]\n  ARepo --> AL[(audit_logs)]\n  ARepo -->|ordered desc, limit| Resp[AuditLogResponse list]"
     },
     "e6449cb3-57d5-4e9b-8b3d-90a44a25b527": {
-      "businessValue": "Provides a dependency-free liveness signal for uptime monitoring and deployment checks.",
-      "mermaidDiagram": "graph TD\n  PROBE[GET /] --> H[read_root handler]\n  H --> OK[200 status ok]"
+      "businessValue": "Lightweight liveness probe confirming the backend process is up. Drives the dashboard gateway-status indicator.",
+      "mermaidDiagram": "graph TD\n  Probe[GET /] --> H[Health Handler]\n  H -->|200 status ok| Resp[message: Backend API is running]"
+    },
+    "4b1451a7-b718-42d7-bb68-cfe6faee3fb1": {
+      "businessValue": "Admin's full item lifecycle: browse, create, toggle, and the exclusive delete capability. Delete is the one control gated to Admin only, making this the privileged management surface.",
+      "mermaidDiagram": "graph TD\n  Adm[Admin] -->|create / toggle / delete| F[Item Dashboard]\n  F -->|X-Persona: Admin| G[Gateway]\n  G -->|RBAC allow writes| I[Item Service]\n  I --> DB[(items)]\n  DB -->|trigger| AL[(audit_logs)]"
+    },
+    "19355ac1-4e1f-4780-9e7b-5defc7543014": {
+      "businessValue": "Admin review of the audit trail. Surfaces every recorded mutation with timestamp, action, table, and record id for accountability.",
+      "mermaidDiagram": "graph TD\n  Adm[Admin] -->|view| AC[Audit Log Card]\n  AC -->|GET /api/audit| G[Gateway]\n  G --> AS[Audit Service]\n  AS --> AL[(audit_logs)]"
+    },
+    "12e6c277-5f49-4e57-88e8-aa27d8cd855c": {
+      "businessValue": "Viewer's read-only oversight: browse items, confirm gateway connectivity, read the audit trail, and switch the active persona to observe RBAC behavior. No write controls are rendered.",
+      "mermaidDiagram": "graph TD\n  V[Viewer] -->|browse / read| F[Item Dashboard]\n  F -->|X-Persona: Viewer| G[Gateway]\n  G -->|reads allowed| I[Item Service]\n  G --> A[Audit Service]\n  F -->|switch persona| F"
     }
   }
 }
